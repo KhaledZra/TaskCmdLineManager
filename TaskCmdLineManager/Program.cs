@@ -77,7 +77,7 @@ namespace TaskCmdLineManager
                     case "rcomp":
                         if (args.Length == 2)
                         {
-                            DeleteFile(args);
+                            RemoveCompleted(args);
                         }
                         else
                         {
@@ -261,6 +261,29 @@ namespace TaskCmdLineManager
 
             }
         }
+        public static void RemoveCompleted(string[] cmdStrings)
+        {
+            if (_files.Count == 0)
+            {
+                Console.WriteLine("No lists available! use <dotnet run init filename>.");
+            }
+            else
+            {
+                LoadTask(cmdStrings[1]);
+                if (!(_tasks.Count == 0))
+                {
+                    for (int i = 0; i < _tasks.Count; i++)
+                    {
+                        if (_tasks[i].IsCompleted == true)
+                        {
+                            Console.WriteLine($"Task {i + 1}, {_tasks[i].TaskDescription}. Has been removed!");
+                            _tasks.RemoveAt(i);
+                        }
+                    }
+                    SaveTask(cmdStrings[1]);
+                }
+            }
+        }
         public static void DeleteFile(string[] cmdStrings)
         {
             if (ConfirmFilePath(cmdStrings[1]))
@@ -366,6 +389,5 @@ namespace TaskCmdLineManager
 
             return false;
         }
-
     }
 }
