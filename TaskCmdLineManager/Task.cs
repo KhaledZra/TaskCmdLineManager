@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace TaskCmdLineManager
@@ -34,6 +35,29 @@ namespace TaskCmdLineManager
         public static Task Initialize(string taskDesc, bool isComp)
         {
             return new Task(taskDesc, isComp);
+        }
+
+        public void ShowTask()
+        {
+            Console.WriteLine($"| Task: {TaskDescription}");
+            Console.WriteLine($"| Status: {ShowCompletion()}");
+        }
+
+        private string ShowCompletion()
+        {
+            if (this.IsCompleted == true)
+            {
+                return "[X]";
+            }
+            else
+            {
+                return "[ ]";
+            }
+        }
+
+        public void ToggleCompletion()
+        {
+            this.IsCompleted = !IsCompleted;
         }
     }
 }
