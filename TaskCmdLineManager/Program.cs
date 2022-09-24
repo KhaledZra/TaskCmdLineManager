@@ -1,4 +1,7 @@
-﻿namespace TaskCmdLineManager
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace TaskCmdLineManager
 {
     internal class Program
     {
@@ -30,6 +33,12 @@
         {
             Console.WriteLine("Worked!");
             Console.WriteLine($"Input: {args[0]}");
+
+            string sFileName = "TaskList.json";
+            string sJsonString = JsonSerializer.Serialize(new Task("Do homework", false));
+            File.WriteAllText(sFileName, sJsonString);
+
+            Console.WriteLine(File.ReadAllText(sFileName));
         }
     }
 }
