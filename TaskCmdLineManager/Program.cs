@@ -74,6 +74,30 @@ namespace TaskCmdLineManager
                         }
                         break;
 
+                    case "rcomp":
+                        if (args.Length == 2)
+                        {
+                            DeleteFile(args);
+                        }
+                        else
+                        {
+                            Console.WriteLine("ERROR! Type <dotnet run rcomp FileName> (without <>)");
+                        }
+                        break;
+
+                    case "delete":
+                        if (args.Length == 2)
+                        {
+                            DeleteFile(args);
+                        }
+                        else
+                        {
+                            Console.WriteLine("ERROR! Type <dotnet run delete FileName> (without <>)");
+                        }
+                        break;
+
+
+
                     default:
                         Console.WriteLine("ERROR! Type <dotnet run help> to find out how to get started!");
                         break;
@@ -107,6 +131,10 @@ namespace TaskCmdLineManager
             Console.WriteLine("dotnet run show NewList | Shows all the Tasks you created in NewList");
             Console.WriteLine("---");
             Console.WriteLine("dotnet run complete NewList 1 | Completes task 1 in NewList");
+            Console.WriteLine("---");
+            Console.WriteLine("dotnet run rcomp NewList | Removes completed tasks in NewList");
+            Console.WriteLine("---");
+            Console.WriteLine("dotnet run delete NewList.json | WARNING! DELETES NewList FULLY. All data in NewList WILL be lost!");
             Console.WriteLine("-----------------");
         }
         // Command methods
@@ -231,6 +259,27 @@ namespace TaskCmdLineManager
                     }
                 }
 
+            }
+        }
+        public static void DeleteFile(string[] cmdStrings)
+        {
+            if (ConfirmFilePath(cmdStrings[1]))
+            {
+                for (int i = 0; i < _files.Count; i++)
+                {
+                    if (_files[i].FileName == cmdStrings[1])
+                    {
+                        _files.RemoveAt(i);
+                    }
+                }
+                File.Delete(cmdStrings[1]);
+                SaveFileList();
+                Console.WriteLine($"File {cmdStrings[1]} removed!");
+
+            }
+            else
+            {
+                Console.WriteLine($"File {cmdStrings[1]} not found!");
             }
         }
 
