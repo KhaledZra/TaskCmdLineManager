@@ -15,5 +15,14 @@ namespace TaskCmdLineManager
         {
             this.FileName = fileName;
         }
+        public JsonFileHandler()
+        {
+            this.FileName = "Default";
+        }
+
+        public void ShowFile()
+        {
+            Console.WriteLine($"| File name: {FileName}");
+        }
     }
 }
