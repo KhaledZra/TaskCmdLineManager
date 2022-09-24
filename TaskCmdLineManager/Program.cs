@@ -46,7 +46,8 @@ namespace TaskCmdLineManager
                         }
                         else
                         {
-                            Console.WriteLine("Error!");
+                            Console.WriteLine("Error! Do this: <dotnet run show>. (Without <>)");
+                            Console.WriteLine("If you wanna show a specific List: <dotnet run show ListName>. (Without <>)");
                         }
 
                         break;
@@ -58,7 +59,18 @@ namespace TaskCmdLineManager
                         }
                         else
                         {
-                            Console.WriteLine("ERROR! Type <dotnet run add listname 'task description text'> (without '')");
+                            Console.WriteLine("ERROR! Type <dotnet run add ListName 'task description text'> (without '')");
+                        }
+                        break;
+
+                    case "complete":
+                        if (args.Length == 3)
+                        {
+                            CompleteTask(args);
+                        }
+                        else
+                        {
+                            Console.WriteLine("ERROR! Type <dotnet run complete ListName 1> (without <>)");
                         }
                         break;
 
@@ -93,31 +105,11 @@ namespace TaskCmdLineManager
             Console.WriteLine("dotnet run show | Shows all the Lists you created");
             Console.WriteLine("---");
             Console.WriteLine("dotnet run show NewList | Shows all the Tasks you created in NewList");
+            Console.WriteLine("---");
+            Console.WriteLine("dotnet run complete NewList 1 | Completes task 1 in NewList");
             Console.WriteLine("-----------------");
         }
-
-        public static List<JsonFileHandler> LoadKnownFiles()
-        {
-            string sFileName = "FileList.json";
-            string sJsonString = File.ReadAllText(sFileName);
-            if (string.IsNullOrWhiteSpace(sJsonString))
-            {
-                return new List<JsonFileHandler>();
-            }
-            else
-            {
-                return JsonSerializer.Deserialize<List<JsonFileHandler>>(sJsonString)!;
-            }
-        }
-
-        public static void SaveFileList()
-        {
-            string sFileName = "FileList.json";
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string sJsonString = JsonSerializer.Serialize<List<JsonFileHandler>>(_files, options);
-            File.WriteAllText(sFileName, sJsonString);
-        }
-
+        // Command methods
         public static void Init(string listName)
         {
             if (ConfirmFilePath(listName + ".json") == false)
@@ -135,7 +127,6 @@ namespace TaskCmdLineManager
 
             Console.WriteLine($"Successfully created new List with name: {listName}!");
         }
-
         public static void ShowTaskList(string sListName)
         {
             if (_files.Count == 0)
@@ -155,14 +146,9 @@ namespace TaskCmdLineManager
                     }
                     Console.WriteLine("---------------- ");
                 }
-                //else
-                //{
-                //    Console.WriteLine("No tasks added yet! use <dotnet> <run> <add> <filename> <task description>.");
-                //}
             }
 
         }
-
         public static void ShowFileList()
         {
             if (_files.Count == 0)
@@ -180,59 +166,10 @@ namespace TaskCmdLineManager
                 Console.WriteLine("---------------- ");
             }
         }
-
-        public static void SaveTask(string sListName)
-        {
-            // Source: https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/how-to?pivots=dotnet-6-0
-            // The following example uses synchronous code to create a JSON file:
-            sListName = sListName + ".json";
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string sJsonString = JsonSerializer.Serialize<List<Task>>(_tasks, options);
-            File.WriteAllText(sListName, sJsonString);
-
-            // The following example uses asynchronous code to create a JSON file:
-            //string fileName = "WeatherForecast.json";
-            //using FileStream createStream = File.Create(fileName);
-            //await JsonSerializer.SerializeAsync(createStream, weatherForecast);
-            //await createStream.DisposeAsync();
-
-            //Console.WriteLine(File.ReadAllText(sFileName));
-        }
-
-        public static void LoadTask(string listName)
-        {
-            // Source: https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/how-to?pivots=dotnet-6-0
-            // To deserialize from a file by using synchronous code
-            string sFileName = listName + ".json";
-            if (ConfirmFilePath(sFileName))
-            {
-                string sJsonString = File.ReadAllText(sFileName);
-                _tasks = JsonSerializer.Deserialize<List<Task>>(sJsonString)!;
-            }
-            else
-            {
-                Console.WriteLine($"Filename '{listName}' does not exist.");
-            }
-            //return JsonSerializer.Deserialize<Task>(sJsonString)!;
-        }
-
-        public static bool ConfirmFilePath(string fileName)
-        {
-            foreach (JsonFileHandler item in _files)
-            {
-                if (item.FileName == fileName)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         public static void AddTask(string[] cmdStrings)
         {
             string taskDesc = string.Empty;
-            for (int i = 2; i < cmdStrings.Length-1; i++)
+            for (int i = 2; i < cmdStrings.Length - 1; i++)
             {
                 taskDesc += (cmdStrings[i] + " ");
             }
@@ -254,7 +191,119 @@ namespace TaskCmdLineManager
 
             }
         }
+        public static void CompleteTask(string[] cmdStrings)
+        {
+            if (_files.Count == 0)
+            {
+                Console.WriteLine("No lists available! use <dotnet run init filename>.");
+            }
+            else
+            {
+                LoadTask(cmdStrings[1]);
+                if (!(_tasks.Count == 0))
+                {
+                    if (int.TryParse(cmdStrings[2], out int result))
+                    {
+                        result--;
+                        for (int i = 0; i < _tasks.Count; i++)
+                        {
+                            if (result == i)
+                            {
+                                if (_tasks[i].IsCompleted == false)
+                                {
+                                    _tasks[i].ToggleCompletion();
+                                    Console.WriteLine($"Task {i + 1}, {_tasks[i].TaskDescription}. Has been marked completed!");
+                                    SaveTask(cmdStrings[1]);
+                                    return;
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"Error! Task {i + 1} has already been marked completed!");
+                                    return;
+                                }
+                            }
+                        }
+                        Console.WriteLine($"No task with number: {result+1} found.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error! Enter the number of the task to complete it!");
+                    }
+                }
 
+            }
+        }
+
+        // Load/Save File methods
+        public static List<JsonFileHandler> LoadKnownFiles()
+        {
+            string sFileName = "FileList.json";
+            string sJsonString = File.ReadAllText(sFileName);
+            if (string.IsNullOrWhiteSpace(sJsonString))
+            {
+                return new List<JsonFileHandler>();
+            }
+            else
+            {
+                return JsonSerializer.Deserialize<List<JsonFileHandler>>(sJsonString)!;
+            }
+        }
+        public static void SaveFileList()
+        {
+            string sFileName = "FileList.json";
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string sJsonString = JsonSerializer.Serialize<List<JsonFileHandler>>(_files, options);
+            File.WriteAllText(sFileName, sJsonString);
+        }
+
+        // Load/Save Task Methods
+        public static void SaveTask(string sListName)
+        {
+            // Source: https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/how-to?pivots=dotnet-6-0
+            // The following example uses synchronous code to create a JSON file:
+            sListName = sListName + ".json";
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            string sJsonString = JsonSerializer.Serialize<List<Task>>(_tasks, options);
+            File.WriteAllText(sListName, sJsonString);
+
+            // The following example uses asynchronous code to create a JSON file:
+            //string fileName = "WeatherForecast.json";
+            //using FileStream createStream = File.Create(fileName);
+            //await JsonSerializer.SerializeAsync(createStream, weatherForecast);
+            //await createStream.DisposeAsync();
+
+            //Console.WriteLine(File.ReadAllText(sFileName));
+        }
+        public static void LoadTask(string listName)
+        {
+            // Source: https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/how-to?pivots=dotnet-6-0
+            // To deserialize from a file by using synchronous code
+            string sFileName = listName + ".json";
+            if (ConfirmFilePath(sFileName))
+            {
+                string sJsonString = File.ReadAllText(sFileName);
+                _tasks = JsonSerializer.Deserialize<List<Task>>(sJsonString)!;
+            }
+            else
+            {
+                Console.WriteLine($"Filename '{listName}' does not exist.");
+            }
+            //return JsonSerializer.Deserialize<Task>(sJsonString)!;
+        }
+
+        // Other methods
+        public static bool ConfirmFilePath(string fileName)
+        {
+            foreach (JsonFileHandler item in _files)
+            {
+                if (item.FileName == fileName)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
         public static bool DupeTask(string taskDesc)
         {
             foreach (Task item in _tasks)
