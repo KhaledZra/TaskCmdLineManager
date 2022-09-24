@@ -13,7 +13,7 @@ namespace TaskCmdLineManager
         static void Main(string[] args)
         {
             Console.Clear();
-            Console.WriteLine(_files.Count);
+            Console.WriteLine($"Amount of Task lists: {_files.Count}");
             if (!(args.Length == 0))
             {
                 Console.WriteLine($"Input: {args[0]}");
@@ -74,6 +74,28 @@ namespace TaskCmdLineManager
             }
         }
 
+        public static void Help()
+        {
+            Console.WriteLine("Welcome to Khaled's Commandline Task Manager!");
+            Console.WriteLine("-----------------");
+            Console.WriteLine("You can use the following commands below as a guide to create your first list.");
+            Console.WriteLine("You will also add your first task and learn how to complete it!");
+            Console.WriteLine("The left side of | represents the command you are expected to enter");
+            Console.WriteLine("The right side of | represents the explanation for the command");
+            Console.WriteLine("-----------------");
+            Console.WriteLine("Commands: ");
+            Console.WriteLine("dotnet run help | Brings you what you see right now!");
+            Console.WriteLine("---");
+            Console.WriteLine("dotnet run init NewList | You can replace NewList with a name you want!");
+            Console.WriteLine("---");
+            Console.WriteLine("dotnet run add NewList walk my dog | Adds new task in NewList 'walk my dog");
+            Console.WriteLine("---");
+            Console.WriteLine("dotnet run show | Shows all the Lists you created");
+            Console.WriteLine("---");
+            Console.WriteLine("dotnet run show NewList | Shows all the Tasks you created in NewList");
+            Console.WriteLine("-----------------");
+        }
+
         public static List<JsonFileHandler> LoadKnownFiles()
         {
             string sFileName = "FileList.json";
@@ -94,11 +116,6 @@ namespace TaskCmdLineManager
             var options = new JsonSerializerOptions { WriteIndented = true };
             string sJsonString = JsonSerializer.Serialize<List<JsonFileHandler>>(_files, options);
             File.WriteAllText(sFileName, sJsonString);
-        }
-
-        public static void Help()
-        {
-
         }
 
         public static void Init(string listName)
