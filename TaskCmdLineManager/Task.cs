@@ -14,8 +14,16 @@ namespace TaskCmdLineManager
         private bool _isCompleted;
 
         // Property
-        public string TaskDescription { get; set; }
-        public bool IsCompleted { get; set; }
+        public string TaskDescription
+        {
+            get { return _taskDescription; }
+            set { _taskDescription = value; }
+        }
+        public bool IsCompleted
+        {
+            get { return _isCompleted; }
+            set { _isCompleted = value; }
+        }
 
         // Default Constructor
         public Task()

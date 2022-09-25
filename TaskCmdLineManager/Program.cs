@@ -14,99 +14,99 @@ namespace TaskCmdLineManager
         {
             Console.Clear();
             Console.WriteLine($"Amount of Task lists: {_files.Count}");
-            if (!(args.Length == 0))
-            {
-                Console.WriteLine($"Input: {args[0]}");
-                Console.WriteLine("Output: ");
-                switch (args[0].ToLower())
-                {
-                    case "help":
-                        Help();
-                        break;
-
-                    case "init":
-                        if (args.Length == 2)
-                        {
-                            Init(args[1]);
-                        }
-                        else
-                        {
-                            Console.WriteLine("Error! Do this: <dotnet run init filename>. (Without <>)");
-                        }
-                        break;
-
-                    case "show":
-                        if (args.Length == 2)
-                        {
-                            ShowTaskList(args[1]);
-                        }
-                        else if (args.Length == 1)
-                        {
-                            ShowFileList();
-                        }
-                        else
-                        {
-                            Console.WriteLine("Error! Do this: <dotnet run show>. (Without <>)");
-                            Console.WriteLine("If you wanna show a specific List: <dotnet run show ListName>. (Without <>)");
-                        }
-
-                        break;
-
-                    case "add":
-                        if (args.Length >= 3)
-                        {
-                            AddTask(args);
-                        }
-                        else
-                        {
-                            Console.WriteLine("ERROR! Type <dotnet run add ListName 'task description text'> (without '')");
-                        }
-                        break;
-
-                    case "complete":
-                        if (args.Length == 3)
-                        {
-                            CompleteTask(args);
-                        }
-                        else
-                        {
-                            Console.WriteLine("ERROR! Type <dotnet run complete ListName 1> (without <>)");
-                        }
-                        break;
-
-                    case "rcomp":
-                        if (args.Length == 2)
-                        {
-                            RemoveCompleted(args);
-                        }
-                        else
-                        {
-                            Console.WriteLine("ERROR! Type <dotnet run rcomp FileName> (without <>)");
-                        }
-                        break;
-
-                    case "delete":
-                        if (args.Length == 2)
-                        {
-                            DeleteFile(args);
-                        }
-                        else
-                        {
-                            Console.WriteLine("ERROR! Type <dotnet run delete FileName> (without <>)");
-                        }
-                        break;
-
-
-
-                    default:
-                        Console.WriteLine("ERROR! Type <dotnet run help> to find out how to get started!");
-                        break;
-
-                }
-            }
-            else
+            // Early return check
+            if (args.Length <= 0)
             {
                 Console.WriteLine("No command used! Enter this to get started: <dotnet run help>");
+                return;
+            }
+
+            Console.WriteLine($"Input: {args[0]}");
+            Console.WriteLine("Output: ");
+            switch (args[0].ToLower())
+            {
+                case "help":
+                    Help();
+                    break;
+
+                case "init":
+                    if (args.Length == 2)
+                    {
+                        Init(args[1]);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error! Do this: <dotnet run init filename>. (Without <>)");
+                    }
+                    break;
+
+                case "show":
+                    if (args.Length == 2)
+                    {
+                        ShowTaskList(args[1]);
+                    }
+                    else if (args.Length == 1)
+                    {
+                        ShowFileList();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error! Do this: <dotnet run show>. (Without <>)");
+                        Console.WriteLine("If you wanna show a specific List: <dotnet run show ListName>. (Without <>)");
+                    }
+
+                    break;
+
+                case "add":
+                    if (args.Length >= 3)
+                    {
+                        AddTask(args);
+                    }
+                    else
+                    {
+                        Console.WriteLine("ERROR! Type <dotnet run add ListName 'task description text'> (without '')");
+                    }
+                    break;
+
+                case "complete":
+                    if (args.Length == 3)
+                    {
+                        CompleteTask(args);
+                    }
+                    else
+                    {
+                        Console.WriteLine("ERROR! Type <dotnet run complete ListName 1> (without <>)");
+                    }
+                    break;
+
+                case "rcomp":
+                    if (args.Length == 2)
+                    {
+                        RemoveCompleted(args);
+                    }
+                    else
+                    {
+                        Console.WriteLine("ERROR! Type <dotnet run rcomp FileName> (without <>)");
+                    }
+                    break;
+
+                case "delete":
+                    if (args.Length == 2)
+                    {
+                        DeleteFile(args);
+                    }
+                    else
+                    {
+                        Console.WriteLine("ERROR! Type <dotnet run delete FileName> (without <>)");
+                    }
+                    break;
+
+
+
+                default:
+                    Console.WriteLine("ERROR! Type <dotnet run help> to find out how to get started!");
+                    break;
+
             }
         }
 
@@ -124,7 +124,7 @@ namespace TaskCmdLineManager
             Console.WriteLine("---");
             Console.WriteLine("dotnet run init NewList | You can replace NewList with a name you want!");
             Console.WriteLine("---");
-            Console.WriteLine("dotnet run add NewList walk my dog | Adds new task in NewList 'walk my dog");
+            Console.WriteLine("dotnet run add NewList walk my dog | Adds new task in NewList 'walk my dog'");
             Console.WriteLine("---");
             Console.WriteLine("dotnet run show | Shows all the Lists you created");
             Console.WriteLine("---");
@@ -163,19 +163,20 @@ namespace TaskCmdLineManager
             }
             else
             {
-                LoadTask(sListName);
-                if (!(_tasks.Count == 0))
+                if (LoadTask(sListName))
                 {
-                    for (int i = 0; i < _tasks.Count; i++)
+                    if (!(_tasks.Count == 0))
                     {
+                        for (int i = 0; i < _tasks.Count; i++)
+                        {
+                            Console.WriteLine("---------------- ");
+                            Console.WriteLine($"Task: {i + 1}");
+                            _tasks[i].ShowTask();
+                        }
                         Console.WriteLine("---------------- ");
-                        Console.WriteLine($"Task: {i + 1}");
-                        _tasks[i].ShowTask();
                     }
-                    Console.WriteLine("---------------- ");
                 }
             }
-
         }
         public static void ShowFileList()
         {
@@ -209,14 +210,15 @@ namespace TaskCmdLineManager
             }
             else
             {
-                LoadTask(cmdStrings[1]);
-                if (!DupeTask(taskDesc))
+                if (LoadTask(cmdStrings[1]))
                 {
-                    _tasks.Add(new Task(taskDesc, false));
-                    SaveTask(cmdStrings[1]);
-                    Console.WriteLine($"Task added! To view use <dotnet run show {cmdStrings[1]}>.");
+                    if (!DupeTask(taskDesc))
+                    {
+                        _tasks.Add(new Task(taskDesc, false));
+                        SaveTask(cmdStrings[1]);
+                        Console.WriteLine($"Task added! To view use <dotnet run show {cmdStrings[1]}>.");
+                    }
                 }
-
             }
         }
         public static void CompleteTask(string[] cmdStrings)
@@ -346,7 +348,7 @@ namespace TaskCmdLineManager
 
             //Console.WriteLine(File.ReadAllText(sFileName));
         }
-        public static void LoadTask(string listName)
+        public static bool LoadTask(string listName)
         {
             // Source: https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/how-to?pivots=dotnet-6-0
             // To deserialize from a file by using synchronous code
@@ -355,10 +357,12 @@ namespace TaskCmdLineManager
             {
                 string sJsonString = File.ReadAllText(sFileName);
                 _tasks = JsonSerializer.Deserialize<List<Task>>(sJsonString)!;
+                return true;
             }
             else
             {
                 Console.WriteLine($"Filename '{listName}' does not exist.");
+                return false;
             }
             //return JsonSerializer.Deserialize<Task>(sJsonString)!;
         }
