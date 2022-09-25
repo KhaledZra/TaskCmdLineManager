@@ -1,14 +1,14 @@
 "# TaskCmdLineManager"
 
-Use <dotnet run help> to get started or read up on the commands below. Otherwise the program will try to guide you a little
+Use <dotnet run help> to get started or read up on the commands below. Otherwise the program will try to guide you a little.
 through how it's used without prior knowledge!
 
 Welcome to Khaled's Commandline Task Manager!
 -----------------
 You can use the following commands below as a guide to create your first list.
 You will also add your first task and learn how to complete it!
-The left side of | represents the command you are expected to enter
-The right side of | represents the explanation for the command
+The left side of | represents the command you are expected to enter.
+The right side of | represents the explanation for the command.
 -----------------
 Commands: 
 dotnet run help | Brings you what you see right now!
